@@ -1,0 +1,136 @@
+animFrame = window.requestAnimationFrame ||
+            window.webkitRequestAnimationFrame ||
+            window.mozRequestAnimationFrame    ||
+            window.oRequestAnimationFrame      ||
+            window.msRequestAnimationFrame     ||
+            null;
+
+
+ArenaWidth = ;
+ArenaHeight = ;
+
+//Boucle de jeu
+function recursiveAnim (){
+    clearGame();
+	updateGame();
+    drawGame();
+    animFrame( recursiveAnim );
+};
+clearGame = function() {
+    clearItems();
+};
+drawGame = function() {
+    //drawScene();
+    drawItems();
+};
+updateItems = function() {
+    enemies.update();
+    towers.update();
+};
+drawItems = function() {
+    enemies.draw();
+    towers.draw();
+};
+clearItems = function() {
+    enemies.clear();
+    towers.clear();
+};
+
+
+//Fonction permettant d'initialiser le jeu.
+init = function(divId){
+    var divArena = document.getElementById(divId);
+    this.canArena = document.createElement("canvas");
+    this.canArena.setAttribute("id", "canArena");
+    this.canArena.setAttribute("width", ArenaWidth);
+    this.canArena.setAttribute("height", ArenaHeight);
+    this.conArena = this.canArena.getContext("2d");
+    divArena.appendChild(this.canArena);  
+    
+    enemies = new Enemy();
+    towers = new Tower();
+    
+    animFrame( recursiveAnim ); //Début de la boucle de jeu.
+};
+
+
+
+Enemy = function(){
+
+	this.x=x;
+	this.y=y;
+	this.xOrigine=x;
+    this.yOrigine=y;
+	this.exists=true;
+    this.width;
+    this.height;
+	this.speed;
+	this.life;
+	this.damage;
+	this.level;
+	this.animation = new Animation();
+	this.KO = new Animation();
+};
+
+Enemy.prototype.draw=function(){
+	
+	if(this.life>0){ this.animation.draw(this.x,this.y);
+    } else {
+		this.KO.draw(this.x,this.y);
+	}
+}
+
+
+Tower = function(){
+
+	this.xPos=x;
+	this.yPos=y;
+	this.width;
+	this.height;
+	this.portee;
+	this.damage;
+	this.level;
+	this.type;
+	
+};
+
+
+
+
+Animation = function(url, length, width, height){
+    this.tabOffscreenCanvas = new Array();
+    this.width = width;
+    this.height = height; 
+    this.length = length;
+    this.ready = false;
+    this.cpt = 0; //Compteur désignant l'avancement de l'animation
+    var image = new Image();
+    image.src = url;
+    var that = this;
+    image.onload = function(){
+        that.ready = true;
+        var offscreenCanvas, offscreenContext;
+        for(var j=0;j<that.length;j++){ 
+			offscreenCanvas = document.createElement("canvas");
+			offscreenCanvas.width = that.width;
+			offscreenCanvas.height = that.height;
+			offscreenContext = offscreenCanvas.getContext("2d");
+            offscreenContext.drawImage(image,0,j*that.height,that.width,that.height,0,0,that.width,that.height);
+			that.tabOffscreenCanvas.push(offscreenCanvas);
+        }
+    }
+}
+
+Animation.prototype.clear = function(x,y){
+    conArena.clearRect(x,y,this.width,this.height);
+}
+Animation.prototype.update = function(){
+    if(tics % 5 == 1) {
+        this.cpt = (this.cpt + 1) % this.length; //On augmente le compteur de l'animation toutes les 5 frames.
+    }
+}
+Animation.prototype.draw = function(x,y){
+    if(this.ready){
+        conArena.drawImage(this.tabOffscreenCanvas[this.cpt],x,y); //On ne dessine l'animation que si celle-ci a finie de précharger.
+    }
+}
