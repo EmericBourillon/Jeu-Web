@@ -17,6 +17,11 @@ function recursiveAnim (){
     drawGame();
     animFrame( recursiveAnim );
 };
+updateGame = function() {
+    tics++;
+    //updateScene(); //Pour faire évoluer l'arrière-plan
+    updateItems();
+};
 clearGame = function() {
     clearItems();
 };
@@ -27,6 +32,7 @@ drawGame = function() {
 updateItems = function() {
     enemies.update();
     towers.update();
+	target.update();
 };
 drawItems = function() {
     enemies.draw();
